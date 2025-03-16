@@ -1,0 +1,76 @@
+name: Build and Cross-Compile
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y g++ gcc xorg-dev
+
+    - name: Build for Linux
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+        make
+
+    - name: Archive Linux Build
+      run: |
+        cd build
+        zip linux-build.zip game
+
+    - name: Upload Linux Build
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: build/linux-build.zip
+        asset_name: linux-build.zip
+        asset_content_type: application/zip
+
+  cross-compile-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ gcc mingw-w64
+
+    - name: Cross-compile for Windows
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_TOOLCHAIN_FILE=../mingw-toolchain.cmake ..
+        make
+
+    - name: Archive Windows Build
+      run: |
+        cd build
+        zip windows-build.zip game.exe
+
+    - name: Upload Windows Build
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: build/windows-build.zip
+        asset_name: windows-build.zip
+        asset_content_type: application/zip
