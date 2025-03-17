@@ -3,6 +3,7 @@
 #include <vector>
 
 typedef long size_noise;
+typedef long seed_noise;
 typedef std::vector<std::vector<double>> vector_noise;
 class Noise {
     private:

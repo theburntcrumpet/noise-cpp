@@ -5,6 +5,6 @@
 
 class NoiseStrategy {
     public:
-        virtual Noise GenerateNoise(size_noise width, size_noise height) = 0;
+        virtual Noise GenerateNoise(size_noise width, size_noise height, seed_noise seed, double frequency) = 0;
 };
 #endif
